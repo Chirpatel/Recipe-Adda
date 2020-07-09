@@ -1,0 +1,33 @@
+.RecipeSearchBar{
+    margin:10px;
+    width:calc(100% - 20px);
+    display: block;
+}
+.searchbar{
+    margin: 10px;
+    width: fit-content;
+    width: -moz-fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+.searchbar input{
+    margin:5px;
+    border:2px solid black;
+    padding:2px 5px;
+    border-radius: 10px;
+    height:30px;
+    font-size: 20px;
+    outline: none;
+}
+.searchbar button{
+    outline:none;
+    text-decoration: none;
+    color:black;
+    background-color: transparent;
+    padding:2px 5px;
+    border:2px solid black;
+    border-radius: 10px;
+    height:30px;
+    font-size: 20px;
+    cursor: pointer;
+}
