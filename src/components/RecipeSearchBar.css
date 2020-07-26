@@ -12,9 +12,9 @@
 }
 .searchbar input{
     margin:5px;
-    border:2px solid black;
-    padding:2px 5px;
-    border-radius: 10px;
+    border:1px solid black;
+    padding:2px 10px;
+    border-radius: 25px;
     height:30px;
     font-size: 20px;
     outline: none;
@@ -25,8 +25,8 @@
     color:black;
     background-color: transparent;
     padding:2px 5px;
-    border:2px solid black;
-    border-radius: 10px;
+    border:none;
+    border-radius: 25px;
     height:30px;
     font-size: 20px;
     cursor: pointer;

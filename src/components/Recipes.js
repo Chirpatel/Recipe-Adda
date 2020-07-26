@@ -24,10 +24,20 @@ function Recipes(props) {
     //console.log( window.innerWidth,window.innerHeight);
     const [Recipes,setRecipes]  = useState('');
     //console.log(props);
+    const[searchLoading,setLoading] = useState({value:"Searching...",display:'1'});
 
     useEffect(()=>{
+        async function s(){
+            if (props.query==="main"){
+                setLoading({value:"Loading Popular Recipes...",display:'1'});
+            }else{
+                setLoading({value:"Searching...",display:'1'});
+            }
+        }
         async function h(){
-            const data = await Recipe({query:props.query});
+            s();
+            var data=await Recipe({query:props.query});
+            
             //console.log(data);
             const feed = data['feed'];
             var reciepediv=[];
@@ -49,69 +59,134 @@ function Recipes(props) {
                 }
                 $('#'+tabName).slideToggle();
               }
+            
             if(feed.length===0){
-                reciepediv.push(<h2 style={{"text-align": "center"}}>Unable to Find Food Recipes.</h2>)
+                reciepediv.push(<h2 style={{"text-align": "center"}}>Unable to Find Food Recipes for {props.query}.</h2>)
+            }else{
+                if(props.query!=='main')
+                    reciepediv.push(<h1>Search result for {props.query}</h1>)
             }
+            
+            /* eslint-disable */
+            var tempd={};
             for(var i=0;i<feed.length;i++){
                 var temp=[];
                 var temp1=[];
+                //console.log(i);
                 for(var x=0;x<n && i<feed.length;x++){
+                    
                     const content = feed[i].content;
                     const display = feed[i].display;
+                    //console.log(tempd);
+                    if(tempd[display['displayName']]){
+                        x--;
+                        i++;
+                        continue;
+                    }else{
+                        tempd[display['displayName']]=true;
+                    }
+                    if(content['details'])
+                        if(content['details']['globalId']){
+
                     temp.push(<div className="column" onClick={()=>{openTab(content['details']['globalId']);}} style={{"backgroundImage":`url(${display['images'][0]})`}}>
                        <span> {display['displayName']}</span>
                     </div>);
+                    }
+                    else{
+                        x-=1;
+                        i++;
+                        continue;
+                    }
+                    else{
+                        x-=1;
+                        i++;
+                        continue;
+                    }
 
 
-                    const ingridents = content['ingredientLines']
+                    var ingridents = content['ingredientLines']
                     const steps= content['preparationSteps'];
-                    const nutrition = content['nutrition']['nutritionEstimates'];
-
-
+                    var nutrition;
+                    if(content['nutrition']!==undefined)
+                    nutrition = content['nutrition']['nutritionEstimates'];
                     var temp4=[];
                     temp4.push(<span onClick={()=>{$(`#${content['details']['globalId']}`).slideToggle();}} className="closebtn">&times;</span>);
 
                     temp4.push(<h1>{display['displayName']}</h1>);
-                    temp4.push(<h2>Ingredients</h2>);
-                    var temp3=ingridents.map((s)=><li>{s['wholeLine']}</li>)
-                    temp4.push(<ul>{temp3}</ul>);
-                    temp3=steps.map((s)=><li>{s}</li>)
-                    temp4.push(<h2>Steps</h2>)
-                    temp4.push(<ol className='steps'>{temp3}</ol>);
-
-                    temp4.push(<div><pre><span>Time Taken:</span> {content['details']['totalTime']}</pre><pre><span>Ratings:</span> {content['details']['rating']}</pre></div>);
-
-                    temp4.push(<h2>Nutritions</h2>)
-                    /* eslint-disable */
-                    temp3 = nutrition.map((n)=>{
-                        if(n['value']!==0){
-                            return <pre><span>{n['attribute']}:</span> {n['value']}{n['unit']['abbreviation']}</pre>
+                    if(ingridents){
+                        
+                        var tempi ={};
+                        var temp3=ingridents.map((s)=>{
+                            if(!tempi[s['wholeLine']] && s['wholeLine']!=''){
+                                tempi[s['wholeLine']] = true;
+                                return <li>{s['wholeLine']}</li>
+                            }
+                        })
+                        if(temp3.length>0){
+                            temp4.push(<h2>Ingredients</h2>);
+                            temp4.push(<ul>{temp3}</ul>);
+                        }
+                    }
+                    if(steps){
+                        var temps={};
+                        temp3=steps.map((s)=>{
+                            if(!temps[s]){
+                                temp[s]=true;
+                                return <li>{s}</li>
+                            }
+                        })
+                        if(temp3.length>0){
+                            temp4.push(<h2>Steps</h2>)
+                            temp4.push(<ol className='steps'>{temp3}</ol>);
+                        }
+                    } 
+                    if(content['details']!==undefined)
+                        temp4.push(<div><pre><span>Time Taken:</span> {content['details']['totalTime']}</pre><pre><span>Ratings:</span> {content['details']['rating']}</pre></div>);
+                    if(nutrition){
+                        
+                        
+                        
+                        temp3 = nutrition.map((n)=>{
+                            if(n['value']!==0){
+                                return <pre><span>{n['attribute']}:</span> {n['value']}{n['unit']['abbreviation']}</pre>
+                            }
+                            
+                        })
+                        if(temp3.length>0){
+                            temp4.push(<h2>Nutritions</h2>)
+                            //console.log("Nutrition ",temp3);
+                            temp4.push(<div>{temp3}</div>)
                         }
                         
-                    })
-                    temp4.push(<div>{temp3}</div>)
+                    }
 
                     temp4.push(<button onClick={()=>{window.open(`${content['details']['attribution']['url']}`,"_blank")}}>Url</button>);
                     temp1.push(<div id={content['details']['globalId']} className="containerTab" style={{"display":"none"}}>{temp4}</div>  );
                     
-                    
                     i++;
 
                 }
+                
                 reciepediv.push(<div className="row">{temp}</div>)
                 reciepediv.push(<div>{temp1}</div>);
                 //console.log(reciepediv);
                 
             }
             setRecipes(reciepediv);
+            setLoading({value:"Searching...",display:''});
         }
         h();
     },[props]);
     
 
     return(
+        
         <div className='Recipe'>
+            
             <div>
+            {searchLoading.display &&
+                <h3>{searchLoading.value}</h3>
+            }
                 {Recipes}
             </div>
         </div>

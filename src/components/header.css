@@ -9,3 +9,8 @@ font-size:20px;
     text-decoration: none;
     color:black;
 }   
+
+.Home{
+    float:right;
+    margin-right: 20px;
+}
